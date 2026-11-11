@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sheikhroot.github.io/toolmandi/sitemap.xml

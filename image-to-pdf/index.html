@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to PDF Converter Online — JPG/PNG to PDF, Free | ToolMandi</title>
+<meta name="description" content="Convert images to a single PDF online for free — CNIC scans, documents and application photos. Choose A4 pages or exact image size. Private: everything runs in your browser, nothing uploads.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Image to PDF</h1>
+<p class="sub">Turn photos and scans into one clean PDF — for applications, CNIC copies and documents.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> your images are turned into a PDF inside your browser. They never leave your device — especially important for CNIC and personal documents.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>🖼️ Tap to choose images</b><p>or drag &amp; drop — order of selection becomes the page order</p></div>
+  <input type="file" id="file" accept="image/*" multiple hidden>
+  <div class="row">
+    <div class="field"><label>Page size</label><select id="mode"><option value="a4">A4 page (best for printing &amp; forms)</option><option value="fit">Fit to image (page = photo size)</option></select></div>
+    <div class="field"><label>Margin</label><select id="margin"><option value="10">10 mm</option><option value="0">None</option><option value="20">20 mm</option></select></div>
+    <button class="btn" id="go" disabled>Create PDF</button>
+  </div>
+  <div class="filelist" id="list"></div>
+  <div class="result" id="result"></div>
+</div>
+
+<section class="doc">
+<h2>How to convert images to PDF</h2>
+<ol>
+<li>Select your images in the order you want them as pages.</li>
+<li>Choose <b>A4 page</b> if the PDF will be printed or submitted to a form, or <b>Fit to image</b> to keep each page exactly the photo's size.</li>
+<li>Press <b>Create PDF</b> and download.</li>
+</ol>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Is it safe for CNIC and personal documents?</h3>
+<p>Yes — this is exactly why ToolMandi runs in your browser. Your documents are never uploaded to any server, so there is nothing to store, leak or misuse.</p>
+<h3>Can I reorder the pages?</h3>
+<p>In this version the page order follows your selection order. For combining existing PDFs instead, use <a href="../merge-pdf/">Merge PDF</a>.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../merge-pdf/">Merge PDF</a><a href="../compress-image-to-kb/">Compress Image to KB</a><a href="../image-converter/">Image Converter</a><a href="../resize-image/">Resize Image</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script src="../assets/js/jspdf.umd.min.js"></script>
+<script>
+var files=[];
+setupDrop($('#drop'), $('#file'), function(f){ files=Array.prototype.slice.call(f); $('#list').innerHTML=files.map(function(x){ return '<div><span>'+x.name+'</span><span class="small">'+fmtKB(x.size)+'</span></div>'; }).join(''); if(files.length) $('#drop').innerHTML='<b>✅ '+files.length+' image(s) selected</b><p>tap to change selection</p>'; $('#go').disabled=files.length===0; });
+function fileToDataURL(file){ return new Promise(function(res){ var r=new FileReader(); r.onload=function(){ res(r.result); }; r.readAsDataURL(file); }); }
+$('#go').addEventListener('click', async function(){
+  var btn=$('#go'); btn.disabled=true; btn.textContent='Creating…';
+  try{
+    var jsPDF=window.jspdf.jsPDF;
+    var mode=$('#mode').value, margin=+$('#margin').value;
+    var doc=null;
+    for(var i=0;i<files.length;i++){
+      var data=await fileToDataURL(files[i]);
+      var loaded=await loadImageFromFile(files[i]);
+      var iw=loaded.img.naturalWidth, ih=loaded.img.naturalHeight;
+      var fmt=/\.png$/i.test(files[i].name)||files[i].type==='image/png'?'PNG':'JPEG';
+      if(mode==='fit'){
+        var pw=iw*25.4/96, ph=ih*25.4/96;
+        if(!doc) doc=new jsPDF({unit:'mm', format:[pw,ph]}); else doc.addPage([pw,ph]);
+        doc.addImage(data, fmt, 0, 0, pw, ph);
+      } else {
+        if(!doc) doc=new jsPDF({unit:'mm', format:'a4'}); else doc.addPage('a4');
+        var AW=210-2*margin, AH=297-2*margin;
+        var s=Math.min(AW/(iw*25.4/96), AH/(ih*25.4/96));
+        var w=(iw*25.4/96)*s, h=(ih*25.4/96)*s;
+        doc.addImage(data, fmt, (210-w)/2, (297-h)/2, w, h);
+      }
+      URL.revokeObjectURL(loaded.url);
+    }
+    var blob=doc.output('blob');
+    var box=$('#result'); box.className='result show';
+    box.innerHTML='Your PDF is ready — <b>'+files.length+' page(s)</b>, '+fmtKB(blob.size)+'. <button class="btn gold" id="dl" style="margin-left:8px">⬇ Download PDF</button>';
+    $('#dl').addEventListener('click', function(){ downloadBlob(blob, 'images.pdf'); });
+  }catch(e){ var b2=$('#result'); b2.className='result show bad'; b2.textContent='Something went wrong with one of the images. Try JPG or PNG files.'; }
+  btn.disabled=false; btn.textContent='Create PDF';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compress Image to KB — 20KB, 50KB, 100KB Online Free (FPSC, PPSC, NTS Presets) | ToolMandi</title>
+<meta name="description" content="Compress a photo to an exact size in KB — 20KB, 50KB, 100KB, 200KB — free and private, inside your browser. One-tap presets for FPSC, PPSC, NTS, MDCAT forms and signature uploads. No signup, no watermark.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Compress Image to KB</h1>
+<p class="sub">Reduce your photo to the exact size your form asks for — free, private, and without uploading anything.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> your photo is compressed inside your browser. It never leaves your device.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>📷 Tap to choose a photo</b><p>or drag &amp; drop a JPG, PNG or WebP image here</p></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <div class="chips" id="presets">
+    <button class="chip" data-kb="20">Signature · 20 KB</button>
+    <button class="chip on" data-kb="50">FPSC · 50 KB</button>
+    <button class="chip" data-kb="60">NTS · 60 KB</button>
+    <button class="chip" data-kb="100">PPSC / MDCAT · 100 KB</button>
+    <button class="chip" data-kb="200">CNIC Scan · 200 KB</button>
+  </div>
+  <div class="row">
+    <div class="field"><label>Target size (KB)</label><input type="number" id="target" value="50" min="5" max="5000" style="width:130px"></div>
+    <button class="btn" id="go" disabled>Compress Photo</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+
+<section class="doc">
+<h2>How to compress an image to an exact KB size</h2>
+<ol>
+<li>Choose your photo — a passport photo, CNIC scan or signature.</li>
+<li>Pick a preset (FPSC 50 KB, NTS 60 KB, PPSC/MDCAT 100 KB, signature 20 KB) or type your own target size.</li>
+<li>Press <b>Compress Photo</b>. The tool automatically finds the highest quality that still fits under your target, and reduces the photo's dimensions only if that is the only way to fit.</li>
+<li>Download the result and upload it to your form.</li>
+</ol>
+<h3>Common Pakistani form photo sizes</h3>
+<p>FPSC / CSS photos are typically required at 50–100 KB, PPSC at 300×300 px under 100 KB, NTS at 30–60 KB, MDCAT / ECAT at about 100 KB with signatures up to 200 KB, while most portals limit a signature image to 10–20 KB. Requirements change — always read the exact line on your own form first, then choose the matching preset above.</p>
+<h3>Why does the output become a JPG?</h3>
+<p>Almost every government and exam portal accepts JPG, and JPG is the only common format whose file size can be tuned precisely to a KB target. If your photo is a PNG, it is converted to JPG on a white background automatically.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Is my photo uploaded anywhere?</h3>
+<p>No. Compression runs in your browser using your own device. Nothing is sent to a server.</p>
+<h3>The portal still rejects my photo — why?</h3>
+<p>Some portals also fix the pixel dimensions (for example 300×300). Use our <a href="../resize-image/">Resize Image</a> tool to set the exact pixels first, then compress here.</p>
+<h3>Can I compress a signature to 20 KB?</h3>
+<p>Yes — choose the Signature preset. For a clean result, sign with a dark pen on plain white paper and photograph it in good light.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../passport-photo-maker/">Passport Photo Maker</a><a href="../resize-image/">Resize Image</a><a href="../image-to-pdf/">Image to PDF</a><a href="../image-converter/">Image Converter</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script>
+var currentFile=null, currentImg=null;
+function setTarget(kb){ $('#target').value=kb; document.querySelectorAll('#presets .chip').forEach(function(c){ c.classList.toggle('on', +c.dataset.kb===+kb); }); }
+document.querySelectorAll('#presets .chip').forEach(function(c){ c.addEventListener('click', function(){ setTarget(c.dataset.kb); }); });
+$('#target').addEventListener('input', function(){ document.querySelectorAll('#presets .chip').forEach(function(c){ c.classList.remove('on'); }); });
+setupDrop($('#drop'), $('#file'), async function(files){
+  currentFile=files[0];
+  var loaded=await loadImageFromFile(currentFile);
+  currentImg=loaded.img;
+  $('#drop').innerHTML='<b>✅ '+currentFile.name+'</b><p>'+loaded.img.naturalWidth+' × '+loaded.img.naturalHeight+' px · '+fmtKB(currentFile.size)+' — tap to change</p>';
+  $('#go').disabled=false;
+  $('#result').className='result';
+});
+async function compressTo(img, targetBytes){
+  var scale=1, best=null;
+  for(var attempt=0; attempt<8; attempt++){
+    var w=Math.round(img.naturalWidth*scale), h=Math.round(img.naturalHeight*scale);
+    var canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+    var ctx=canvas.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+    var lo=0.02, hi=1.0, bestBlob=null;
+    for(var i=0;i<9;i++){
+      var q=(lo+hi)/2;
+      var blob=await canvasToBlob(canvas,'image/jpeg',q);
+      if(blob.size<=targetBytes){ bestBlob=blob; lo=q; } else { hi=q; }
+    }
+    if(!bestBlob){ var b2=await canvasToBlob(canvas,'image/jpeg',0.02); if(b2.size<=targetBytes) bestBlob=b2; }
+    if(bestBlob){ return {blob:bestBlob, w:w, h:h}; }
+    scale*=0.8;
+  }
+  return null;
+}
+$('#go').addEventListener('click', async function(){
+  if(!currentImg) return;
+  var kb=Math.max(5, +$('#target').value||50);
+  var btn=$('#go'); btn.disabled=true; btn.textContent='Compressing…';
+  var out=await compressTo(currentImg, kb*1024);
+  btn.disabled=false; btn.textContent='Compress Photo';
+  var box=$('#result');
+  if(!out){ box.className='result show bad'; box.innerHTML='⚠️ This photo could not be reduced to '+kb+' KB without becoming unusable. Try a higher target.'; return; }
+  box.className='result show';
+  box.innerHTML='<div class="stats"><div><span class="small">Original</span><b>'+fmtKB(currentFile.size)+'</b></div><div><span class="small">Compressed</span><b>'+fmtKB(out.blob.size)+'</b></div><div><span class="small">Size</span><b>'+out.w+' × '+out.h+' px</b></div></div><p style="margin:12px 0"><img class="preview" style="max-height:280px" src="'+URL.createObjectURL(out.blob)+'"></p><button class="btn gold" id="dl">⬇ Download Compressed Photo</button>';
+  $('#dl').addEventListener('click', function(){ downloadBlob(out.blob, 'compressed-'+kb+'kb.jpg'); });
+});
+</script>
+</body>
+</html>

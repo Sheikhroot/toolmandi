@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Calculator Online — Exact Age in Years, Months &amp; Days | ToolMandi</title>
+<meta name="description" content="Calculate your exact age in years, months and days from your date of birth — for NADRA, job applications and forms. Plus total days lived and your next birthday countdown. Free.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Age Calculator</h1>
+<p class="sub">Enter a date of birth — get the exact age in years, months and days, the way forms ask for it.</p>
+
+<div class="toolbox">
+  <div class="row">
+    <div class="field"><label>Date of birth</label><input type="date" id="dob"></div>
+    <div class="field"><label>Age on this date</label><input type="date" id="on"></div>
+    <button class="btn" id="go">Calculate Age</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+
+<section class="doc">
+<h2>Why an exact age matters</h2>
+<p>Job applications, NADRA records, exam forms and government eligibility rules often ask for age in exact years, months and days — sometimes "as on" a specific closing date. Guessing a year and subtracting is how applications get rejected. Set the second date to the form's closing date and this calculator gives you the precise answer.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>How is the age calculated?</h3>
+<p>Exactly the way official forms do: full years from the birth date, then full months, then the remaining days — leap years included.</p>
+<h3>Is my date of birth stored?</h3>
+<p>No. The calculation happens in your browser; nothing is sent anywhere.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../word-counter/">Word Counter</a><a href="../passport-photo-maker/">Passport Photo Maker</a><a href="../compress-image-to-kb/">Compress Image to KB</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script>
+var now=new Date(); $('#on').value=now.toISOString().slice(0,10);
+var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+$('#go').addEventListener('click', function(){
+  var box=$('#result');
+  var dobVal=$('#dob').value, onVal=$('#on').value;
+  if(!dobVal){ box.className='result show bad'; box.textContent='Please choose a date of birth first.'; return; }
+  var dob=new Date(dobVal+'T00:00:00'), on=onVal? new Date(onVal+'T00:00:00') : new Date();
+  if(dob>on){ box.className='result show bad'; box.textContent='The date of birth is after the "age on" date. Check the dates.'; return; }
+  var y=on.getFullYear()-dob.getFullYear(), m=on.getMonth()-dob.getMonth(), d=on.getDate()-dob.getDate();
+  if(d<0){ m--; var prev=new Date(on.getFullYear(), on.getMonth(), 0); d+=prev.getDate(); }
+  if(m<0){ y--; m+=12; }
+  var totalDays=Math.floor((on-dob)/86400000);
+  var next=new Date(on.getFullYear(), dob.getMonth(), dob.getDate());
+  if(next<on) next=new Date(on.getFullYear()+1, dob.getMonth(), dob.getDate());
+  var toNext=Math.ceil((next-on)/86400000);
+  box.className='result show';
+  box.innerHTML='<div class="stats"><div><span class="small">Exact age</span><b>'+y+' years, '+m+' months, '+d+' days</b></div><div><span class="small">Total days</span><b>'+totalDays.toLocaleString()+'</b></div><div><span class="small">Born on</span><b>'+DAYS[dob.getDay()]+'</b></div><div><span class="small">Next birthday</span><b>'+(toNext===0?'Today! 🎉':'in '+toNext+' days')+'</b></div></div>';
+});
+</script>
+</body>
+</html>

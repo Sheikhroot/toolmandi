@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Link Generator — Create wa.me Chat Link with Message &amp; QR | ToolMandi</title>
+<meta name="description" content="Create your free WhatsApp chat link (wa.me) with a ready-made message and QR code — for your shop, Facebook page, Instagram bio or business cards. No signup.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">WhatsApp Link Generator</h1>
+<p class="sub">One link that opens a chat with your number — with your message already typed. For shops, pages and bios.</p>
+
+<div class="toolbox">
+  <div class="row">
+    <div class="field"><label>Your WhatsApp number</label><input type="tel" id="num" placeholder="03XX-XXXXXXX or 92XXXXXXXXXX" style="width:250px"></div>
+  </div>
+  <div class="field" style="margin-bottom:12px"><label>Pre-filled message (optional)</label>
+  <textarea id="msg" style="min-height:80px" placeholder="Assalam-o-Alaikum! I want to ask about..."></textarea></div>
+  <div class="result show" id="result" style="display:block">
+    <div class="small">Your WhatsApp link</div>
+    <div id="link" style="font-weight:700;word-break:break-all;margin:6px 0">Enter your number above…</div>
+    <div class="row" style="margin:8px 0 0">
+      <button class="btn" id="copy">📋 Copy Link</button>
+      <a class="btn ghost" id="open" href="#" target="_blank" rel="noopener">Test the Link</a>
+      <button class="btn gold" id="qrBtn">⬇ Download QR Code</button>
+    </div>
+    <canvas id="qrCanvas" width="220" height="220" style="margin-top:14px;display:none" class="preview"></canvas>
+  </div>
+</div>
+
+<section class="doc">
+<h2>How shop owners use a WhatsApp link</h2>
+<p>Put the link in your <b>Instagram and Facebook bio</b>, on your <b>Google Business profile</b>, in your <b>WhatsApp status</b>, and print the QR code for your <b>shop counter and business cards</b>. A customer taps once and the chat opens with your greeting already written — no saving numbers, no "aoa" and silence: they arrive with a question ready.</p>
+<h3>The number format</h3>
+<p>WhatsApp links need the full international number without +, spaces or dashes. A Pakistani number like 0345-1234567 becomes <b>923451234567</b>. This tool converts it for you automatically.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Is this link free?</h3>
+<p>Yes. wa.me links are WhatsApp's own official feature, and this generator is free.</p>
+<h3>Will people see my number?</h3>
+<p>Yes — the number is inside the link. Use your business number, the one you already share with customers.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../qr-code-generator/">QR Code Generator</a><a href="../youtube-thumbnail-downloader/">YouTube Thumbnail Downloader</a><a href="../word-counter/">Word Counter</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script src="../assets/js/qrcode.min.js"></script>
+<script>
+function normalize(num){
+  var d=(num||'').replace(/\D/g,'');
+  if(d.indexOf('0092')===0) d=d.slice(2);
+  if(d.charAt(0)==='0') d='92'+d.slice(1);
+  return d;
+}
+function currentLink(){
+  var d=normalize($('#num').value);
+  if(d.length<10) return null;
+  var link='https://wa.me/'+d;
+  var m=$('#msg').value.trim();
+  if(m) link+='?text='+encodeURIComponent(m);
+  return link;
+}
+function update(){
+  var link=currentLink();
+  $('#link').textContent=link||'Enter a valid number above…';
+  $('#open').href=link||'#';
+  $('#qrCanvas').style.display='none';
+}
+$('#num').addEventListener('input', update);
+$('#msg').addEventListener('input', update);
+$('#copy').addEventListener('click', function(){
+  var link=currentLink(); if(!link) return;
+  navigator.clipboard.writeText(link).then(function(){ $('#copy').textContent='✅ Copied!'; setTimeout(function(){ $('#copy').textContent='📋 Copy Link'; }, 1500); });
+});
+function drawQR(canvas, text, size){
+  var qr=qrcode(0,'M'); qr.addData(text); qr.make();
+  var n=qr.getModuleCount(), cell=Math.floor(size/(n+2)), real=cell*(n+2);
+  canvas.width=real; canvas.height=real;
+  var ctx=canvas.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,real,real); ctx.fillStyle='#000000';
+  for(var r=0;r<n;r++) for(var c=0;c<n;c++) if(qr.isDark(r,c)) ctx.fillRect((c+1)*cell,(r+1)*cell,cell,cell);
+}
+$('#qrBtn').addEventListener('click', function(){
+  var link=currentLink(); if(!link) return;
+  var c=$('#qrCanvas'); drawQR(c, link, 220); c.style.display='block';
+  var big=document.createElement('canvas'); drawQR(big, link, 880);
+  big.toBlob(function(b){ downloadBlob(b,'whatsapp-qr.png'); });
+});
+</script>
+</body>
+</html>

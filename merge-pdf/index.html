@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merge PDF Online — Combine PDF Files Free, No Upload | ToolMandi</title>
+<meta name="description" content="Merge many PDF files into one online for free — in the order you choose. Files are combined inside your browser and never uploaded, so private documents stay private.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Merge PDF</h1>
+<p class="sub">Combine many PDFs into a single file — CNIC + documents + forms, in your chosen order.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> merging happens inside your browser. Your documents never leave your device — unlike most merge sites that upload everything to a server.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>📄 Tap to choose PDF files</b><p>or drag &amp; drop — add as many as you need</p></div>
+  <input type="file" id="file" accept="application/pdf" multiple hidden>
+  <div class="filelist" id="list"></div>
+  <div class="row"><button class="btn" id="go" disabled>Merge PDFs</button></div>
+  <div class="result" id="result"></div>
+</div>
+
+<section class="doc">
+<h2>How to merge PDF files</h2>
+<ol>
+<li>Add your PDF files — tap again to add more.</li>
+<li>Use the ↑ ↓ buttons to arrange them in the order you want in the final file.</li>
+<li>Press <b>Merge PDFs</b> and download the combined file.</li>
+</ol>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Are my documents uploaded to a server?</h3>
+<p>No. This is the biggest difference from most merge tools: the files are combined inside your browser, on your own device. Personal documents — CNIC, income papers, applications — never travel anywhere.</p>
+<h3>Is there a file limit?</h3>
+<p>There is no limit set by us. Very large files depend on your device's memory — a normal phone or computer handles typical application documents easily.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../image-to-pdf/">Image to PDF</a><a href="../compress-image-to-kb/">Compress Image to KB</a><a href="../image-converter/">Image Converter</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script src="../assets/js/pdf-lib.min.js"></script>
+<script>
+var files=[];
+setupDrop($('#drop'), $('#file'), function(f){
+  Array.prototype.forEach.call(f, function(x){ files.push(x); });
+  renderList(); $('#go').disabled=files.length<2;
+});
+function renderList(){
+  $('#list').innerHTML=files.map(function(f,i){
+    return '<div><span>'+(i+1)+'. '+f.name+' <span class="small">('+fmtKB(f.size)+')</span></span><span><button class="chip" data-mv="-1" data-i="'+i+'">↑</button> <button class="chip" data-mv="1" data-i="'+i+'">↓</button> <button class="chip" data-rm="'+i+'">✕</button></span></div>';
+  }).join('') || '<p class="small">No files yet.</p>';
+  $('#list').querySelectorAll('button[data-mv]').forEach(function(b){ b.addEventListener('click', function(){ var i=+b.dataset.i, j=i+(+b.dataset.mv); if(j<0||j>=files.length) return; var t=files[i]; files[i]=files[j]; files[j]=t; renderList(); }); });
+  $('#list').querySelectorAll('button[data-rm]').forEach(function(b){ b.addEventListener('click', function(){ files.splice(+b.dataset.rm,1); renderList(); $('#go').disabled=files.length<2; }); });
+  if(files.length) $('#drop').innerHTML='<b>✅ '+files.length+' PDF(s) added</b><p>tap to add more</p>';
+}
+$('#go').addEventListener('click', async function(){
+  var btn=$('#go'); btn.disabled=true; btn.textContent='Merging…';
+  try{
+    var merged=await PDFLib.PDFDocument.create();
+    var totalPages=0;
+    for(var i=0;i<files.length;i++){
+      var buf=await files[i].arrayBuffer();
+      var src=await PDFLib.PDFDocument.load(buf);
+      var pages=await merged.copyPages(src, src.getPageIndices());
+      pages.forEach(function(p){ merged.addPage(p); });
+      totalPages+=src.getPageCount();
+    }
+    var bytes=await merged.save();
+    var blob=new Blob([bytes], {type:'application/pdf'});
+    var box=$('#result'); box.className='result show';
+    box.innerHTML='Merged — <b>'+files.length+' files, '+totalPages+' pages</b>, '+fmtKB(blob.size)+'. <button class="btn gold" id="dl" style="margin-left:8px">⬇ Download Merged PDF</button>';
+    $('#dl').addEventListener('click', function(){ downloadBlob(blob, 'merged.pdf'); });
+  }catch(e){ var b2=$('#result'); b2.className='result show bad'; b2.textContent='One of the PDFs could not be read (it may be password-protected or damaged). Remove it and try again.'; }
+  btn.disabled=false; btn.textContent='Merge PDFs';
+});
+</script>
+</body>
+</html>

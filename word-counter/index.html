@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Counter Online — Words, Characters &amp; Reading Time, Free | ToolMandi</title>
+<meta name="description" content="Count words, characters, sentences and paragraphs online, with reading time and keyword density — free, instant, and private. For essays, CVs, assignments and articles.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Word Counter</h1>
+<p class="sub">Paste or type your text — word count, characters, sentences and reading time update as you type.</p>
+
+<div class="toolbox">
+  <textarea id="text" placeholder="Start typing or paste your text here…"></textarea>
+  <div class="stats" style="margin-top:14px">
+    <div><span class="small">Words</span><b id="sWords">0</b></div>
+    <div><span class="small">Characters</span><b id="sChars">0</b></div>
+    <div><span class="small">Characters (no spaces)</span><b id="sCharsNS">0</b></div>
+    <div><span class="small">Sentences</span><b id="sSent">0</b></div>
+    <div><span class="small">Paragraphs</span><b id="sPara">0</b></div>
+    <div><span class="small">Reading time</span><b id="sRead">0 min</b></div>
+  </div>
+  <div id="density" style="margin-top:12px" class="small"></div>
+</div>
+
+<section class="doc">
+<h2>Who uses a word counter?</h2>
+<p>Students checking essay and assignment limits, writers and bloggers targeting article lengths, applicants writing CV summaries and personal statements with strict word limits, and social media managers fitting captions into platform limits. The keyword density list below also helps SEO writers see which words they repeat most.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Is my text saved or uploaded?</h3>
+<p>No. Counting happens in your browser as you type; nothing is sent or stored anywhere.</p>
+<h3>How is reading time calculated?</h3>
+<p>At an average adult reading speed of about 200 words per minute.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../age-calculator/">Age Calculator</a><a href="../qr-code-generator/">QR Code Generator</a><a href="../whatsapp-link-generator/">WhatsApp Link Generator</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script>
+function count(){
+  var t=$('#text').value;
+  var words=t.trim()? t.trim().split(/\s+/).length : 0;
+  $('#sWords').textContent=words;
+  $('#sChars').textContent=t.length;
+  $('#sCharsNS').textContent=t.replace(/\s/g,'').length;
+  $('#sSent').textContent=t.trim()? (t.match(/[.!?]+(?=\s|$)/g)||[]).length : 0;
+  $('#sPara').textContent=t.trim()? t.split(/\n\s*\n/).filter(function(p){ return p.trim(); }).length : 0;
+  $('#sRead').textContent=words? Math.max(1, Math.round(words/200))+' min' : '0 min';
+  var freq={};
+  (t.toLowerCase().match(/[a-z0-9']+/g)||[]).forEach(function(w){ if(w.length>2) freq[w]=(freq[w]||0)+1; });
+  var top=Object.keys(freq).sort(function(a,b){ return freq[b]-freq[a]; }).slice(0,8);
+  $('#density').innerHTML=words&&top.length? '<b>Most used words:</b> '+top.map(function(w){ return w+' ('+freq[w]+')'; }).join(' · ') : '';
+}
+$('#text').addEventListener('input', count);
+count();
+</script>
+</body>
+</html>

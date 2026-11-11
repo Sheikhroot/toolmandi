@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passport Size Photo Maker Online — 35×45 mm &amp; CNIC 40×60 mm, Free | ToolMandi</title>
+<meta name="description" content="Make a correct passport size photo online for free: 35×45 mm (passport/visa) and 40×60 mm (CNIC) sizes, plus a print-ready sheet of copies. Private — your photo never leaves your device.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Passport Size Photo Maker</h1>
+<p class="sub">Turn any photo into a correct passport / CNIC size photo — and a print sheet — in seconds.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> your photo stays on your device. Nothing is uploaded.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>📷 Tap to choose your photo</b><p>Front-facing, plain background and good light work best</p></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <div class="chips" id="sizes">
+    <button class="chip on" data-w="413" data-h="531">35 × 45 mm · Passport / Visa</button>
+    <button class="chip" data-w="472" data-h="709">40 × 60 mm · CNIC (PK)</button>
+    <button class="chip" data-w="600" data-h="600">2 × 2 inch · US Visa</button>
+  </div>
+  <div id="stageWrap" style="display:none">
+    <canvas id="stage" class="preview" style="width:min(340px,90vw);touch-action:none;cursor:grab"></canvas>
+    <div class="row">
+      <div class="field" style="flex:1;min-width:180px"><label>Zoom</label><input type="range" id="zoom" min="1" max="3" step="0.01" value="1" style="width:100%"></div>
+      <span class="small">Drag the photo to position your face in the frame.</span>
+    </div>
+    <div class="row">
+      <button class="btn" id="dlOne">⬇ Download Photo</button>
+      <button class="btn gold" id="dlSheet">⬇ Download Print Sheet</button>
+    </div>
+    <div class="result" id="result"></div>
+  </div>
+</div>
+
+<section class="doc">
+<h2>How to make a passport size photo</h2>
+<ol>
+<li>Take or choose a front-facing photo — face in the centre, plain light background, no cap or sunglasses.</li>
+<li>Choose the size your form needs: <b>35 × 45 mm</b> for passports and most visas, <b>40 × 60 mm</b> for Pakistani CNIC, <b>2 × 2 inch</b> for US visa.</li>
+<li>Drag the photo and use the zoom slider until your face fills the frame the way passport photos do — head and shoulders, face clearly visible.</li>
+<li>Download the single photo, or a print sheet you can print once and cut many copies from.</li>
+</ol>
+<h3>Need the photo under a KB limit as well?</h3>
+<p>Many online forms also limit the file size (for example 50 KB or 100 KB). After making your photo here, run it through our <a href="../compress-image-to-kb/">Compress Image to KB</a> tool to hit the exact size.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>What is the passport photo size in Pakistan?</h3>
+<p>Pakistani passport and most visa photos are 35 × 45 mm. CNIC photos commonly use 40 × 60 mm. Always confirm the size written on your form or portal.</p>
+<h3>Can this tool remove or change the background?</h3>
+<p>No — and be careful of tools that promise it carelessly, because a badly cut background is a common reason photos get rejected. Shoot against a plain white or light wall instead; this tool then crops you to the exact official size.</p>
+<h3>Is my photo uploaded?</h3>
+<p>No. Everything happens inside your browser on your own device.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../compress-image-to-kb/">Compress Image to KB</a><a href="../resize-image/">Resize Image</a><a href="../image-to-pdf/">Image to PDF</a><a href="../image-converter/">Image Converter</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script>
+var img=null, OW=413, OH=531, panX=0, panY=0, zoom=1;
+var stage=$('#stage'), ctx=stage.getContext('2d');
+function setSize(w,h){ OW=w; OH=h; stage.width=w; stage.height=h; panX=0; panY=0; zoom=1; $('#zoom').value=1; draw(); }
+document.querySelectorAll('#sizes .chip').forEach(function(c){ c.addEventListener('click', function(){ document.querySelectorAll('#sizes .chip').forEach(function(x){x.classList.remove('on');}); c.classList.add('on'); setSize(+c.dataset.w, +c.dataset.h); }); });
+setupDrop($('#drop'), $('#file'), async function(files){
+  var loaded=await loadImageFromFile(files[0]); img=loaded.img;
+  $('#drop').innerHTML='<b>✅ '+files[0].name+'</b><p>tap to change photo</p>';
+  $('#stageWrap').style.display='block';
+  setSize(OW,OH);
+});
+function draw(){
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,OW,OH);
+  if(!img) return;
+  var s=Math.max(OW/img.naturalWidth, OH/img.naturalHeight)*zoom;
+  var dw=img.naturalWidth*s, dh=img.naturalHeight*s;
+  var dx=(OW-dw)/2+panX, dy=(OH-dh)/2+panY;
+  dx=Math.min(0, Math.max(OW-dw, dx)); dy=Math.min(0, Math.max(OH-dh, dy));
+  panX=dx-(OW-dw)/2; panY=dy-(OH-dh)/2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+var dragging=false, lx=0, ly=0;
+stage.addEventListener('pointerdown', function(e){ dragging=true; lx=e.clientX; ly=e.clientY; stage.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointermove', function(e){ if(!dragging) return; var r=stage.getBoundingClientRect(); var sx=OW/r.width, sy=OH/r.height; panX+=(e.clientX-lx)*sx; panY+=(e.clientY-ly)*sy; lx=e.clientX; ly=e.clientY; draw(); });
+stage.addEventListener('pointerup', function(){ dragging=false; });
+$('#zoom').addEventListener('input', function(){ zoom=+this.value; draw(); });
+$('#dlOne').addEventListener('click', async function(){ var b=await canvasToBlob(stage,'image/jpeg',0.92); downloadBlob(b,'passport-photo-'+OW+'x'+OH+'.jpg'); showMsg('Your passport photo ('+OW+' × '+OH+' px, '+fmtKB(b.size)+') is downloading.'); });
+$('#dlSheet').addEventListener('click', async function(){
+  var sheet=document.createElement('canvas'); sheet.width=1800; sheet.height=1200; var c2=sheet.getContext('2d');
+  c2.fillStyle='#ffffff'; c2.fillRect(0,0,1800,1200);
+  var gap=24, cols=Math.max(1, Math.floor((1800-gap)/(OW+gap))), rows=Math.max(1, Math.floor((1200-gap)/(OH+gap)));
+  var n=0; for(var rI=0;rI<rows;rI++) for(var cI=0;cI<cols;cI++){ c2.drawImage(stage, gap+cI*(OW+gap), gap+rI*(OH+gap)); n++; }
+  var b=await canvasToBlob(sheet,'image/jpeg',0.92); downloadBlob(b,'passport-print-sheet.jpg');
+  showMsg('Print sheet with '+n+' copies is downloading — print it at 100% scale (4×6 inch / 6×4 paper) and cut along the photos.');
+});
+function showMsg(t){ var box=$('#result'); box.className='result show'; box.textContent=t; }
+stage.width=OW; stage.height=OH; draw();
+</script>
+</body>
+</html>

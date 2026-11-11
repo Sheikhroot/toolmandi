@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Thumbnail Downloader — HD Thumbnail Download Free | ToolMandi</title>
+<meta name="description" content="Download any public YouTube video thumbnail in HD (1280×720), SD and more sizes — free. Paste the video link and save the thumbnail image.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">YouTube Thumbnail Downloader</h1>
+<p class="sub">Paste a YouTube video link — get its thumbnail in every size, ready to download.</p>
+
+<div class="toolbox">
+  <div class="row">
+    <div class="field" style="flex:1;min-width:240px"><label>YouTube video link</label><input type="text" id="url" placeholder="https://www.youtube.com/watch?v=... or youtu.be/... or a Shorts link" style="width:100%"></div>
+    <button class="btn" id="go">Get Thumbnails</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+
+<section class="doc">
+<h2>How it works</h2>
+<p>Every public YouTube video has official thumbnail images stored by YouTube itself at predictable addresses. This tool simply reads the video ID from your link and shows you those images — the HD version (1280×720) when the channel uploaded one, plus SD and smaller sizes.</p>
+<h3>A note on use</h3>
+<p>Thumbnails belong to their creators. Download them for study, inspiration and fair reference — do not re-upload someone else's thumbnail as your own.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Why is the HD thumbnail missing for some videos?</h3>
+<p>Older videos and some Shorts never had a 1280×720 thumbnail. In that case the SD (640×480) version is the best available.</p>
+<h3>Does this download videos?</h3>
+<p>No — only the thumbnail image. This tool does not download videos.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../qr-code-generator/">QR Code Generator</a><a href="../whatsapp-link-generator/">WhatsApp Link Generator</a><a href="../resize-image/">Resize Image</a><a href="../image-converter/">Image Converter</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script>
+function videoId(u){
+  if(!u) return null;
+  u=u.trim();
+  var m=u.match(/(?:youtube\.com\/(?:watch\?[^#]*v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(m) return m[1];
+  if(/^[A-Za-z0-9_-]{11}$/.test(u)) return u;
+  return null;
+}
+$('#go').addEventListener('click', function(){
+  var id=videoId($('#url').value);
+  var box=$('#result');
+  if(!id){ box.className='result show bad'; box.textContent='That does not look like a YouTube video link. Paste a full watch, Shorts or youtu.be link.'; return; }
+  var sizes=[['maxresdefault','HD · 1280×720'],['sddefault','SD · 640×480'],['hqdefault','HQ · 480×360'],['mqdefault','MQ · 320×180']];
+  box.className='result show';
+  box.innerHTML=sizes.map(function(s){
+    var src='https://i.ytimg.com/vi/'+id+'/'+s[0]+'.jpg';
+    return '<div style="margin-bottom:16px"><div class="small" style="margin-bottom:6px"><b>'+s[1]+'</b></div><img class="preview" style="max-height:300px" src="'+src+'" onerror="this.parentNode.style.display=\'none\'"><div style="margin-top:8px"><a class="btn gold" href="'+src+'" target="_blank" rel="noopener">Open / Save '+s[1].split(' ')[0]+'</a></div></div>';
+  }).join('')+'<p class="small">Tip: right-click (or long-press) the image and choose "Save image" — or use the Open button, then save from the image page.</p>';
+});
+$('#url').addEventListener('keydown', function(e){ if(e.key==='Enter') $('#go').click(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resize Image Online — Exact Pixels &amp; Social Media Presets, Free | ToolMandi</title>
+<meta name="description" content="Resize any image to exact pixels online for free — with presets for PPSC 300×300, Instagram, YouTube thumbnails, Facebook covers and more. Runs in your browser; your image never uploads.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Resize Image</h1>
+<p class="sub">Change a photo's pixel size exactly — for forms, social media and websites.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> resizing happens inside your browser. Nothing is uploaded.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>📷 Tap to choose a photo</b><p>or drag &amp; drop an image here</p></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <div class="chips" id="presets">
+    <button class="chip" data-w="300" data-h="300">PPSC · 300×300</button>
+    <button class="chip" data-w="413" data-h="531">Passport · 413×531</button>
+    <button class="chip" data-w="1080" data-h="1080">Instagram Post · 1080×1080</button>
+    <button class="chip" data-w="1080" data-h="1920">Story / Reel · 1080×1920</button>
+    <button class="chip" data-w="1280" data-h="720">YouTube Thumbnail · 1280×720</button>
+    <button class="chip" data-w="820" data-h="312">Facebook Cover · 820×312</button>
+  </div>
+  <div class="row">
+    <div class="field"><label>Width (px)</label><input type="number" id="w" style="width:120px"></div>
+    <div class="field"><label>Height (px)</label><input type="number" id="h" style="width:120px"></div>
+    <div class="field"><label>&nbsp;</label><span><input type="checkbox" id="lock" checked> Keep ratio</span></div>
+    <div class="field"><label>Format</label><select id="fmt"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></div>
+    <button class="btn" id="go" disabled>Resize &amp; Download</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+
+<section class="doc">
+<h2>How to resize an image</h2>
+<ol>
+<li>Choose your photo and read its current size.</li>
+<li>Pick a preset or type the exact width and height you need. Keep "Keep ratio" on to avoid stretching — turn it off only when a form demands exact pixels (like PPSC 300×300).</li>
+<li>Press <b>Resize &amp; Download</b>.</li>
+</ol>
+<p>If the portal also limits the file size in KB, finish with our <a href="../compress-image-to-kb/">Compress Image to KB</a> tool.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>My photo looks stretched — why?</h3>
+<p>That happens when the new width and height have a different ratio than the original and "Keep ratio" is off. Only do that when a form explicitly demands exact dimensions.</p>
+<h3>Is my image uploaded?</h3>
+<p>No — resizing runs entirely in your browser.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../compress-image-to-kb/">Compress Image to KB</a><a href="../passport-photo-maker/">Passport Photo Maker</a><a href="../image-converter/">Image Converter</a><a href="../image-to-pdf/">Image to PDF</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script>
+var img=null, ratio=1;
+setupDrop($('#drop'), $('#file'), async function(files){
+  var loaded=await loadImageFromFile(files[0]); img=loaded.img; ratio=img.naturalWidth/img.naturalHeight;
+  $('#w').value=img.naturalWidth; $('#h').value=img.naturalHeight;
+  $('#drop').innerHTML='<b>✅ '+files[0].name+'</b><p>'+img.naturalWidth+' × '+img.naturalHeight+' px · '+fmtKB(files[0].size)+' — tap to change</p>';
+  $('#go').disabled=false;
+});
+$('#w').addEventListener('input', function(){ if($('#lock').checked && +this.value>0) $('#h').value=Math.round(this.value/ratio); });
+$('#h').addEventListener('input', function(){ if($('#lock').checked && +this.value>0) $('#w').value=Math.round(this.value*ratio); });
+document.querySelectorAll('#presets .chip').forEach(function(c){ c.addEventListener('click', function(){ $('#lock').checked=false; $('#w').value=c.dataset.w; $('#h').value=c.dataset.h; }); });
+$('#go').addEventListener('click', async function(){
+  var w=Math.max(1,+$('#w').value||1), h=Math.max(1,+$('#h').value||1);
+  var canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+  var ctx=canvas.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+  var fmt=$('#fmt').value, ext=fmt==='image/png'?'png':(fmt==='image/webp'?'webp':'jpg');
+  var blob=await canvasToBlob(canvas, fmt, 0.92);
+  var box=$('#result'); box.className='result show';
+  box.innerHTML='Done — resized to <b>'+w+' × '+h+' px</b> ('+fmtKB(blob.size)+'). <button class="btn gold" id="dl" style="margin-left:8px">⬇ Download</button>';
+  $('#dl').addEventListener('click', function(){ downloadBlob(blob, 'resized-'+w+'x'+h+'.'+ext); });
+});
+</script>
+</body>
+</html>
