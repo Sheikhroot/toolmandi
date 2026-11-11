@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Photo Maker Online — ID Photo with White Background, Free | ToolMandi</title>
+<meta name="description" content="Make a student ID photo online for free — correct sizes for admissions, exam forms and school/college ID cards, with white or blue background. Private: your photo never leaves your device.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">Student Photo Maker</h1>
+<p class="sub">An ID-ready student photo in the right size — with a clean white or blue background — for admissions, exam forms and ID cards.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> your photo stays on your device. Nothing is uploaded.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>📷 Tap to choose your photo</b><p>A plain background behind you gives the best background-change result</p></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <div class="chips" id="sizes">
+    <button class="chip on" data-w="413" data-h="531">35 × 45 mm · Standard</button>
+    <button class="chip" data-w="472" data-h="709">40 × 60 mm · CNIC</button>
+    <button class="chip" data-w="300" data-h="300">1 × 1 inch</button>
+    <button class="chip" data-w="600" data-h="600">2 × 2 inch</button>
+  </div>
+  <div id="stageWrap" style="display:none">
+    <canvas id="stage" class="preview" style="width:min(320px,88vw);touch-action:none;cursor:grab"></canvas>
+    <div class="row">
+      <div class="field" style="flex:1;min-width:160px"><label>Zoom</label><input type="range" id="zoom" min="1" max="3" step="0.01" value="1" style="width:100%"></div>
+      <div class="field"><label>Background</label><select id="bgSel">
+        <option value="none">Keep original</option>
+        <option value="white" selected>White background</option>
+        <option value="blue">Blue background</option>
+        <option value="grey">Light grey</option>
+      </select></div>
+      <div class="field"><label>Background strength</label><input type="range" id="tol" min="15" max="110" step="1" value="48" style="width:130px"></div>
+    </div>
+    <p class="small">Drag the photo to position your face. If the background change eats into clothes or hair, lower the strength; if parts of the old background remain, raise it.</p>
+    <div class="row">
+      <button class="btn" id="dlOne">⬇ Download Photo</button>
+      <button class="btn gold" id="dlSheet">⬇ Download Print Sheet</button>
+    </div>
+    <div class="result" id="result"></div>
+  </div>
+</div>
+
+<section class="doc">
+<h2>How to make a student ID photo</h2>
+<ol>
+<li>Take a front-facing photo against the plainest wall you can find, in good light.</li>
+<li>Choose the size your school, college or form asks for — 35 × 45 mm is the most common.</li>
+<li>Drag and zoom until your head and shoulders fill the frame.</li>
+<li>Set the background to white (or blue, when your institution asks for blue) and adjust the strength until the edges look clean.</li>
+<li>Download the photo — or a print sheet with many copies for forms that need several.</li>
+</ol>
+<h3>Need it under a KB limit too?</h3>
+<p>Online admission and exam portals often also limit the file (50 KB / 100 KB). Finish with our <a href="../compress-image-to-kb/">Compress Image to KB</a> tool.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Which background do institutions want — white or blue?</h3>
+<p>Most Pakistani schools, colleges and exam boards accept white; some ask for blue. Always follow the instruction written on your form — both are one tap here.</p>
+<h3>Will the background change work on any photo?</h3>
+<p>It works best when the original background is plain (a wall). Busy backgrounds with many colours close to your clothes or skin can fool it — in that case, retake the photo against a plain wall; it takes a minute and gives a studio-like result.</p>
+<h3>Is my photo uploaded?</h3>
+<p>No. Everything runs inside your browser on your device.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../passport-photo-maker/">Passport Photo Maker</a><a href="../compress-image-to-kb/">Compress Image to KB</a><a href="../linkedin-profile-photo-maker/">LinkedIn Profile Photo Maker</a><a href="../image-to-pdf/">Image to PDF</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script src="../assets/js/photostudio.js"></script>
+<script>
+var studio=tmCreateStudio($('#stage'), 413, 531);
+var BG={ white:[255,255,255], blue:[47,109,179], grey:[227,230,235] };
+function applyBg(){
+  var v=$('#bgSel').value;
+  studio.setBg(v==='none'? null : { tol:+$('#tol').value, rgb:BG[v] });
+}
+$('#bgSel').addEventListener('change', applyBg);
+$('#tol').addEventListener('input', applyBg);
+document.querySelectorAll('#sizes .chip').forEach(function(c){ c.addEventListener('click', function(){ document.querySelectorAll('#sizes .chip').forEach(function(x){x.classList.remove('on');}); c.classList.add('on'); studio.setSize(+c.dataset.w, +c.dataset.h); $('#zoom').value=1; }); });
+setupDrop($('#drop'), $('#file'), async function(files){
+  var loaded=await loadImageFromFile(files[0]);
+  $('#drop').innerHTML='<b>✅ '+files[0].name+'</b><p>tap to change photo</p>';
+  $('#stageWrap').style.display='block';
+  studio.setImage(loaded.img); $('#zoom').value=1; applyBg();
+});
+$('#zoom').addEventListener('input', function(){ studio.setZoom(+this.value); });
+$('#dlOne').addEventListener('click', async function(){ var out=studio.output(); var b=await canvasToBlob(out,'image/jpeg',0.92); downloadBlob(b,'student-photo-'+out.width+'x'+out.height+'.jpg'); showMsg('Your student photo ('+out.width+' × '+out.height+' px, '+fmtKB(b.size)+') is downloading.'); });
+$('#dlSheet').addEventListener('click', async function(){
+  var out=studio.output();
+  var sheet=document.createElement('canvas'); sheet.width=1800; sheet.height=1200; var c2=sheet.getContext('2d');
+  c2.fillStyle='#ffffff'; c2.fillRect(0,0,1800,1200);
+  var gap=24, cols=Math.max(1, Math.floor((1800-gap)/(out.width+gap))), rows=Math.max(1, Math.floor((1200-gap)/(out.height+gap))), n=0;
+  for(var rI=0;rI<rows;rI++) for(var cI=0;cI<cols;cI++){ c2.drawImage(out, gap+cI*(out.width+gap), gap+rI*(out.height+gap)); n++; }
+  var b=await canvasToBlob(sheet,'image/jpeg',0.92); downloadBlob(b,'student-photo-print-sheet.jpg');
+  showMsg('Print sheet with '+n+' copies is downloading — print at 100% scale and cut along the photos.');
+});
+function showMsg(t){ var box=$('#result'); box.className='result show'; box.textContent=t; }
+</script>
+</body>
+</html>

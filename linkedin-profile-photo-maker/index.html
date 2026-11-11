@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Profile Photo Maker — Perfect Circle Crop &amp; Size, Free | ToolMandi</title>
+<meta name="description" content="Make a perfect LinkedIn profile photo online for free: exact 800×800 size, live circle preview so you see exactly what LinkedIn shows, optional clean background. Private — runs in your browser.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2314213d'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23f4b400' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.stageBox{position:relative;width:min(340px,90vw);aspect-ratio:1;margin:0 auto}
+.stageBox canvas{width:100%;height:100%;display:block}
+.circleGuide{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 3px #f4b400, 0 0 0 999px rgba(10,15,26,.45);pointer-events:none}
+</style>
+</head>
+<body>
+<script src="../assets/js/common.js"></script>
+<script>tmHeader('../');</script>
+<main><div class="wrap">
+<h1 class="page">LinkedIn Profile Photo Maker</h1>
+<p class="sub">Frame your face exactly the way LinkedIn's circle will show it — at the right size, with an optional clean background.</p>
+<div class="privacy-note">🔒 <b>100% private:</b> your photo stays on your device. Nothing is uploaded.</div>
+
+<div class="toolbox">
+  <div class="drop" id="drop"><b>📷 Tap to choose your photo</b><p>A clear, front-facing photo with good light works best</p></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <div id="stageWrap" style="display:none">
+    <div class="stageBox">
+      <canvas id="stage" style="touch-action:none;cursor:grab"></canvas>
+      <div class="circleGuide"></div>
+    </div>
+    <div class="row">
+      <div class="field" style="flex:1;min-width:160px"><label>Zoom</label><input type="range" id="zoom" min="1" max="3" step="0.01" value="1" style="width:100%"></div>
+      <div class="field"><label>Background</label><select id="bgSel">
+        <option value="none" selected>Keep original</option>
+        <option value="white">White background</option>
+        <option value="grey">Light grey</option>
+        <option value="blue">Soft blue</option>
+      </select></div>
+      <div class="field"><label>Background strength</label><input type="range" id="tol" min="15" max="110" step="1" value="48" style="width:130px"></div>
+    </div>
+    <p class="small">Drag to centre your face inside the gold circle — that circle is exactly what recruiters and clients will see.</p>
+    <div class="row"><button class="btn gold" id="dl">⬇ Download LinkedIn Photo (800×800)</button></div>
+    <div class="result" id="result"></div>
+  </div>
+</div>
+
+<section class="doc">
+<h2>The right LinkedIn profile photo size</h2>
+<p>LinkedIn asks for a square photo of at least <b>400 × 400 pixels</b> and displays it as a circle. This tool exports <b>800 × 800</b> — double the minimum, so your photo stays sharp on every screen. Frame your face to fill roughly 60% of the circle, keep some space above your head, and smile the way you would meeting a client.</p>
+<h3>Quick wins recruiters notice</h3>
+<p>Plain background, natural light from the front, no sunglasses or group-photo crops, and clothes you would wear to a meeting. Profiles with a clear, professional photo get dramatically more views and connection accepts than logos, selfies in cars, or cropped wedding photos.</p>
+</section>
+
+<section class="doc">
+<h2>Frequently Asked Questions</h2>
+<h3>Why does the download come as a square if LinkedIn shows a circle?</h3>
+<p>LinkedIn itself crops your square upload into the circle. The gold circle in this tool previews that crop exactly, so there are no surprises after uploading.</p>
+<h3>Does the background change work on any photo?</h3>
+<p>Best on a plain background. If your photo already has a decent background, keep the original — natural is professional.</p>
+<h3>Is my photo uploaded?</h3>
+<p>No. Everything runs inside your browser on your device.</p>
+</section>
+
+<section class="doc"><h2>Related tools</h2><div class="related">
+<a href="../student-photo-maker/">Student Photo Maker</a><a href="../passport-photo-maker/">Passport Photo Maker</a><a href="../resize-image/">Resize Image</a><a href="../compress-image-to-kb/">Compress Image to KB</a>
+</div></section>
+
+</div></main>
+<script>tmFooter('../');</script>
+<script src="../assets/js/photostudio.js"></script>
+<script>
+var studio=tmCreateStudio($('#stage'), 800, 800);
+var BG={ white:[255,255,255], grey:[227,230,235], blue:[209,224,240] };
+function applyBg(){ var v=$('#bgSel').value; studio.setBg(v==='none'? null : { tol:+$('#tol').value, rgb:BG[v] }); }
+$('#bgSel').addEventListener('change', applyBg);
+$('#tol').addEventListener('input', applyBg);
+setupDrop($('#drop'), $('#file'), async function(files){
+  var loaded=await loadImageFromFile(files[0]);
+  $('#drop').innerHTML='<b>✅ '+files[0].name+'</b><p>tap to change photo</p>';
+  $('#stageWrap').style.display='block';
+  studio.setImage(loaded.img); $('#zoom').value=1;
+});
+$('#zoom').addEventListener('input', function(){ studio.setZoom(+this.value); });
+$('#dl').addEventListener('click', async function(){
+  var out=studio.output(); var b=await canvasToBlob(out,'image/jpeg',0.92); downloadBlob(b,'linkedin-profile-photo-800x800.jpg');
+  var box=$('#result'); box.className='result show'; box.textContent='Your LinkedIn photo (800 × 800, '+fmtKB(b.size)+') is downloading. On LinkedIn: Profile → camera icon on your photo → upload this file.';
+});
+</script>
+</body>
+</html>
